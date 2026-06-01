@@ -1,0 +1,78 @@
+name: Auth0 JavaScript Tests
+
+on:
+push:
+branches:
+- master
+- main
+pull_request:
+branches:
+- master
+- main
+
+jobs:
+login-test:
+runs-on: ubuntu-latest
+
+env:
+  AUTH0_TEST_DOMAIN: ${{ secrets.AUTH0_TEST_DOMAIN }}
+  AUTH0_TEST_CLIENT_ID: ${{ secrets.AUTH0_TEST_CLIENT_ID }}
+  AUTH0_TEST_AUDIENCE: ${{ secrets.AUTH0_TEST_AUDIENCE }}
+
+steps:
+  - name: Checkout repository
+    uses: actions/checkout@v4
+
+  - name: Create Auth0 config
+    run: |
+      echo '{
+        "domain":"'"$AUTH0_TEST_DOMAIN"'",
+        "clientId":"'"$AUTH0_TEST_CLIENT_ID"'",
+        "audience":"'"$AUTH0_TEST_AUDIENCE"'"
+      }' > 01-Login/auth_config.json
+
+  - name: Build Login Sample
+    run: |
+      docker build -t login-sample ./01-Login
+
+  - name: Run Login Sample
+    run: |
+      docker run -d -p 3000:3000 --name login-sample login-sample
+
+  - name: Wait for Application
+    run: |
+      sleep 15
+      curl --retry 10 --retry-connrefused http://localhost:3000
+
+api-test:
+runs-on: ubuntu-latest
+
+env:
+  AUTH0_TEST_DOMAIN: ${{ secrets.AUTH0_TEST_DOMAIN }}
+  AUTH0_TEST_CLIENT_ID: ${{ secrets.AUTH0_TEST_CLIENT_ID }}
+  AUTH0_TEST_AUDIENCE: ${{ secrets.AUTH0_TEST_AUDIENCE }}
+
+steps:
+  - name: Checkout repository
+    uses: actions/checkout@v4
+
+  - name: Create Auth0 config
+    run: |
+      echo '{
+        "domain":"'"$AUTH0_TEST_DOMAIN"'",
+        "clientId":"'"$AUTH0_TEST_CLIENT_ID"'",
+        "audience":"'"$AUTH0_TEST_AUDIENCE"'"
+      }' > 02-Calling-an-API/auth_config.json
+
+  - name: Build API Sample
+    run: |
+      docker build -t api-sample ./02-Calling-an-API
+
+  - name: Run API Sample
+    run: |
+      docker run -d -p 3000:3000 --name api-sample api-sample
+
+  - name: Wait for Application
+    run: |
+      sleep 15
+      curl --retry 10 --retry-connrefused http://localhost:3000
