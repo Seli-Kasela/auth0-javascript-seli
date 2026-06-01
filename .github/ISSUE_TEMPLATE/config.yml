@@ -1,5 +1,26 @@
-blank_issues_enabled: false
-contact_links:
-  - name: 🤔 Help & Questions
-    url: https://community.auth0.com
-    about: Ask general support or usage questions in the Auth0 Community forums.
+name: Auth0 JavaScript Tests
+on: push: branches: - master - main pull_request: branches: - master - main
+jobs: login-test: runs-on: ubuntu-latest
+env:
+  AUTH0_TEST_DOMAIN: ${{ secrets.AUTH0_TEST_DOMAIN }}
+  AUTH0_TEST_CLIENT_ID: ${{ secrets.AUTH0_TEST_CLIENT_ID }}
+  AUTH0_TEST_AUDIENCE: ${{ secrets.AUTH0_TEST_AUDIENCE }}
+
+steps:
+  - name: Checkout repository
+    uses: actions/checkout@v4
+
+  - name: Create Auth0 config
+    run: |
+      echo '{
+        "domain":"'"$AUTH0_TEST_DOMAIN"'",
+        "clientId":"'"$AUTH0_TEST_CLIENT_ID"'",
+        "audience":"'"$AUTH0_TEST_AUDIENCE"'"
+      }' > 01-Login/auth_config.json
+
+  - name: Build Login Sample
+    run: |
+      docker build -t login-sample ./01-Login
+
+  - name: Run Login Sample
+    run: 
