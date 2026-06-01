@@ -1,8 +1,11 @@
-# Environment variables to be defined in the build configuration:
-# AUTH0_TEST_CLIENT_ID = Client id to use in test
-# AUTH0_TEST_DOMAIN = Domain to use in test
-# AUTH0_TEST_AUDIENCE = API Audience to use in test
-
+environment:
+  AUTH0_CFG: 01-Login/auth_config.json
+  SAMPLE_PATH: 01-Login
+  - AUTH0_CFG: 02-Calling-an-API/auth_config.json
+  - SAMPLE_PATH: 02-Calling-an-API
+AUTH0_TEST_DOMAIN=selikasela88.us.auth0.com
+AUTH0_TEST_CLIENT_ID=<your Auth0 client id>
+AUTH0_TEST_AUDIENCE=<your API identifier>
 # Common logic
 defaults: &defaults
   steps:
@@ -11,8 +14,7 @@ defaults: &defaults
     - run:
         name: Replace Auth0 test credentials
         command: |
-          echo "{ \"domain\": \"$AUTH0_TEST_DOMAIN\", \"clientId\": \"$AUTH0_TEST_CLIENT_ID\", \"audience\": \"$AUTH0_TEST_API_IDENTIFIER\" }" > $AUTH0_CFG
-
+echo "{ \"domain\": \"$AUTH0_TEST_DOMAIN\", \"clientId\": \"$AUTH0_TEST_CLIENT_ID\", \"audience\": \"$AUTH0_TEST_AUDIENCE\" }" > $AUTH0_CFG
     - run:
         name: Build pull request
         command: |
